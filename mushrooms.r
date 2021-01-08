@@ -1,6 +1,10 @@
 library(readr)
 library(caret)
 library(rpart)
+library(nnet)
+library(rpart)
+library(rpart.plot)
+library(dplyr)
 
 mushrooms <- read_csv("mushrooms.csv", col_types = cols("class" = col_factor(), "gill-attachment" = col_factor(), "veil-type" = col_skip()))
 # This will convert all remaining columns to factors - not neccessary for training models, but usefull for debugging
@@ -39,21 +43,25 @@ train.control <- trainControl(method = "repeatedcv", number = 10, repeats = 3)
 
 multinomModels <- train(class ~ ., data = mushrooms, method = "multinom",
                trControl = train.control)
+print(multinomModels)
+
 logisticRegressionModels <- train(class ~ ., data = mushrooms, method = "glm",
       trControl = train.control, control = list(maxit = 100))
+print(logisticRegressionModels)
 
 decionTreeModels <- train(class ~ ., data = mushrooms, method = "rpart",
                trControl = train.control)
+print(decionTreeModels)
 
 # Strangely this model does not look nice
-prp(model$finalModel)
+prp(decionTreeModels$finalModel)
 
 # Training a single decsion tree again with the best parameters
 decisionTree <- rpart(class ~ ., 
                       data = train, 
                       parms = list(split = "information"), 
                       method = "class",
-                      control = rpart.control(cp = model$bestTune["cp"]))
+                      control = rpart.control(cp = decionTreeModels$bestTune["cp"]))
 predictions <- predict(decisionTree,test,type="class")
 print(confusionMatrix(predictions,test$class)$overall["Accuracy"])
 prp(decisionTree)
