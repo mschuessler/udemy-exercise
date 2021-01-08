@@ -32,7 +32,7 @@ decisionTree <- rpart(class ~ .,
                data = train, 
                parms = list(split = "information"), 
                method = "class",
-               control = rpart.control(minsplit = 1, xval = 1, minbucket = 1, cp = 0.005))
+               control = rpart.control(minsplit = 3, xval = 1, minbucket = 3, cp = 0.005))
 prp(decisionTree)
 
 predictions <- predict(decisionTree,test,type="class")
@@ -65,4 +65,9 @@ decisionTree <- rpart(class ~ .,
 predictions <- predict(decisionTree,test,type="class")
 print(confusionMatrix(predictions,test$class)$overall["Accuracy"])
 prp(decisionTree)
+
+# Random Forest use method rf or parRF
+randomForestModels <- train(class ~ ., data = mushrooms, method = "rf",
+                            trControl = train.control)
+
 
